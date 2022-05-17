@@ -1,0 +1,27 @@
+{
+  "name": "slashcommandhandler",
+  "version": "1.0.0",
+  "description": "Provides tools to help you handle slash commands with discord.js",
+  "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slash",
+    "command",
+    "commands",
+    "discord.js",
+    "discord",
+    "typescript",
+    "javascript",
+    "js",
+    "ts"
+  ],
+  "author": "Stefanuk12",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^13.6.0"
+  }
+}
