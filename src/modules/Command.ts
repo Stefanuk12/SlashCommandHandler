@@ -1,5 +1,5 @@
 // Dependencies
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
 import { PermissionHandler } from "./PermissionHandler.js";
 import { Permissions } from "./Permissions.js";
 import { RolePermissionHandler } from "./RolePermissionHandler.js";

@@ -1,5 +1,5 @@
 // Dependencies
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
 import { lstatSync, readdirSync } from "fs";
 import { Command } from "./Command.js";
 import { PermissionHandler } from "./PermissionHandler.js";
@@ -202,7 +202,7 @@ export async function InitialiseCommands(Directory: string = "./src/commands", D
  * @param SubcommandGroupName The name of the subcommand group name
  * @returns Command
  */
-export function GetCommand(CommandName: string, SubcommandGroupName?: string) {
+export function GetCommand(CommandName: string, SubcommandGroupName?: string | null) {
     if (SubcommandGroupName)
         return Commands.find((command) => command.SlashCommand.name == CommandName && (command.Type == "Command" || command.Type == "SlashCommand") && command.Parent?.SlashCommand.name === SubcommandGroupName)
     else

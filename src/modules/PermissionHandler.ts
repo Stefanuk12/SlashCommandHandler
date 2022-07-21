@@ -1,5 +1,5 @@
 // Dependencies
-import { Client, Guild, GuildMember, PermissionString, Snowflake, User } from "discord.js"
+import { Client, Guild, GuildMember, PermissionsString, Snowflake, User } from "discord.js"
 import { UserToGuildMember } from "./Utilities.js"
 
 //
@@ -8,7 +8,7 @@ export interface IPermissionHandler {
 
     guildSnowflake: Snowflake
 
-    permissions: PermissionString[]
+    permissions: PermissionsString[]
     guild: Guild
 
     positionCheck: boolean

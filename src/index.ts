@@ -1,5 +1,5 @@
 // Dependencies
-import { CommandInteraction, Interaction } from "discord.js";
+import { ChatInputCommandInteraction, Interaction } from "discord.js";
 import { Command, ICommand } from "./modules/Command.js";
 import { AddCommand, Commands, GetCommand, GetSlashCommands, IImportFormat, InitialiseCommands } from "./modules/Commands.js";
 import { IPermissionHandler, PermissionHandler } from "./modules/PermissionHandler.js";
@@ -9,12 +9,9 @@ import { IRolePermissionHandler, RolePermissionHandler } from "./modules/RolePer
 
 
 // Listener that handles all the important stuff
-async function _CommandInteractionListener(interaction: CommandInteraction){
+async function _CommandInteractionListener(interaction: ChatInputCommandInteraction){
     // Attempt to get the command
-    let SubcommandGroup
-    try {
-        SubcommandGroup = interaction.options.getSubcommandGroup()
-    } catch (e) {}
+    let SubcommandGroup = interaction.options.getSubcommandGroup()
     const Command = GetCommand(interaction.commandName, SubcommandGroup)
 
     if (!Command){
@@ -37,7 +34,7 @@ async function _CommandInteractionListener(interaction: CommandInteraction){
 // Listener that has failsafes
 async function CommandInteractionListener(interaction: Interaction){
     // Make sure it is a command
-    if (!interaction.isCommand()) return
+    if (!interaction.isChatInputCommand()) return
 
     // Defer the reply so we have time
     if (!interaction.deferred)

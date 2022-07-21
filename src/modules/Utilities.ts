@@ -1,6 +1,5 @@
 // Dependencies
-import { Client, MessageEmbed, Snowflake, User } from "discord.js"
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandBooleanOption, SlashCommandUserOption, SlashCommandChannelOption, SlashCommandRoleOption, SlashCommandMentionableOption, SlashCommandStringOption, SlashCommandIntegerOption, SlashCommandNumberOption } from "@discordjs/builders";
+import { Client, EmbedBuilder, Snowflake, User, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandBooleanOption, SlashCommandUserOption, SlashCommandChannelOption, SlashCommandRoleOption, SlashCommandMentionableOption, SlashCommandStringOption, SlashCommandIntegerOption, SlashCommandNumberOption } from "discord.js"
 
 // Convert a user to a guild member
 export async function UserToGuildMember(Client: Client, UserId: Snowflake, GuildId: Snowflake){
@@ -25,15 +24,15 @@ export function CreateBaseEmbed(Condition: EmbedCondition, User?: User){
     }
 
     // Create Embed
-    const Embed = new MessageEmbed()
+    const Embed = new EmbedBuilder()
         .setTitle(Condition)
         .setColor(convert[Condition])
 
     // Custom Embed if user is provided
     if (User) {
         // lil circle of thing yes
-        if (Embed.footer) {
-            Embed.footer.iconURL = User.avatarURL() || User.defaultAvatarURL
+        if (Embed.data.footer) {
+            Embed.data.footer.icon_url = User.avatarURL() || User.defaultAvatarURL
         }
     }
 
