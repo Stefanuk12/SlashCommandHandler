@@ -1,6 +1,6 @@
 {
   "name": "slashcommandhandler",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Provides tools to help you handle slash commands with discord.js",
   "exports": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -22,6 +22,6 @@
   "author": "Stefanuk12",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.0.3"
+    "discord.js": "^14.1.2"
   }
 }

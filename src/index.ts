@@ -12,7 +12,8 @@ import { IRolePermissionHandler, RolePermissionHandler } from "./modules/RolePer
 async function _CommandInteractionListener(interaction: ChatInputCommandInteraction){
     // Attempt to get the command
     let SubcommandGroup = interaction.options.getSubcommandGroup()
-    const Command = GetCommand(interaction.commandName, SubcommandGroup)
+    let SubcommandCommand = interaction.options.getSubcommand()
+    const Command = GetCommand([interaction.commandName, SubcommandGroup, SubcommandCommand])
 
     if (!Command){
         throw(new Error("Invalid command"))

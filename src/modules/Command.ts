@@ -7,12 +7,10 @@ import { RolePermissionHandler } from "./RolePermissionHandler.js";
 //
 export interface ICommand {
     SlashCommand: SlashCommandBuilder | SlashCommandSubcommandGroupBuilder | SlashCommandSubcommandBuilder
-    Type: "Command" | "Group" | "SlashCommand"
     Permissions?: Permissions | PermissionHandler | RolePermissionHandler
     Callback?: Function
 
-    Parent?: Command
-    Children: Command[]
+    Parent?: SlashCommandBuilder | SlashCommandSubcommandGroupBuilder
 }
 export interface Command extends ICommand {}
 export class Command {

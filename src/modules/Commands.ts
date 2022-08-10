@@ -6,86 +6,82 @@ import { PermissionHandler } from "./PermissionHandler.js";
 import { Permissions } from "./Permissions.js";
 import { RolePermissionHandler } from "./RolePermissionHandler.js";
 import * as path from "path"
-import { ConvertSubToSlash } from "./Utilities.js";
 
 // Vars
 export const Commands: Command[] = []
 
 /**
  * Finds a subcategory group within the `Commands`
- * @param Path The "command" path. Example: subdirectory/command. You cannot have a depth larger than 2.
- * @param CurrentCategory The command to start at
+ * @param Path The "command" path. Example: command/subgroup. You cannot have a depth larger than 2.
+ * @param Create Whether to create missing commands/subgroups
  */
-export function FindSubcategory(Path: string[], CurrentCategory?: Command){
+export function FindSubcategory(Path: string[], Create: boolean = false){
     // Vars
-    CurrentCategory = CurrentCategory || Commands.find(command => command.Type == "Group" && command.SlashCommand.name == Path.shift())
+    const TopmostParentName = Path[0]
+    let TopmostParent = Commands.find(command => command.SlashCommand instanceof SlashCommandBuilder && command.SlashCommand.name == TopmostParentName)
+    const ParentName = Path[1]
+    let Parent
     
-    // Make sure we have a category in the first place
-    if (!CurrentCategory){
-        return
-    }
+    // Creating topmost parent if it does not exist
+    let MadeTop = false
+    if (!TopmostParent) { 
+        // Return if not creating
+        if (!Create)
+            return
 
-    //
-    const PathShift = Path.shift()
-    if (!PathShift) return CurrentCategory
-    
-    //
-    return CurrentCategory.Children.find(command => command.Type == "Group" && command.SlashCommand.name == PathShift)
-}
+        // Make the slash command
+        const TopmostParentSlash = new SlashCommandBuilder()
+            .setName(TopmostParentName)
+            .setDescription(`All of the ${TopmostParentName} commands`);
 
-/**
- * Finds a subcategory group within the `Commands`. However, if the group does not exist, it will be made
- * @param Path The "command" path. Example: subdirectory/command. You cannot have a depth larger than 2.
- * @param CurrentCategory The command to start at
- */
-export function FindSubcategoryCreate(Path: string[], CurrentCategory?: Command){
-    // Vars
-    const RootPath = Path.shift()
-    CurrentCategory = CurrentCategory || Commands.find(command => command.Type == "Group" && command.SlashCommand.name == RootPath)
-    
-    //
-    if (!RootPath){
-        throw(new Error("Invalid path"))
-    }
-
-    // Make sure we have a category in the first place
-    if (!CurrentCategory){
-        CurrentCategory = new Command({
-            SlashCommand: new SlashCommandBuilder()
-                .setName(RootPath)
-                .setDescription(`All of the ${RootPath} commands`),
-            Type: "Group",
-            Children: []
+        // Make the command
+        TopmostParent = new Command({
+            SlashCommand: TopmostParentSlash
         })
-        Commands.push(CurrentCategory)
-        return CurrentCategory
-    }
 
-    //
-    const PathShift = Path.shift()
-    if (!PathShift || !CurrentCategory) return CurrentCategory
+        // Add it
+        Commands.push(TopmostParent)
+        MadeTop = true
+    }
     
     //
-    let Found = CurrentCategory.Children.find(command => command.Type == "Group" && command.SlashCommand.name == PathShift)
-    if (!Found){
-        Found = new Command({
-            SlashCommand: new SlashCommandBuilder()
-                .setName(PathShift)
-                .setDescription(`All of the ${PathShift} commands`),
-            Type: "Group",
-            Children: [],
-            Parent: CurrentCategory
-        })
-        CurrentCategory.Children.push(Found)
-    }
+    if (Path.length == 2) {
+        // Get the parent
+        Parent = Commands.find(command => command.SlashCommand instanceof SlashCommandSubcommandGroupBuilder && command.Parent?.name == TopmostParentName && command.SlashCommand.name == ParentName)
 
-    //
-    return Found
+        // Make sure it exists
+        if (!Parent) {
+            // Return if not creating
+            if (!Create)
+                return
+
+            // Create the subcommand
+            const ParentName = Path[1]
+            Parent = new Command({
+                SlashCommand: new SlashCommandSubcommandGroupBuilder()
+                    .setName(ParentName)
+                    .setDescription(`All of the ${ParentName} commands`),
+                Parent: <SlashCommandBuilder>TopmostParent.SlashCommand
+            })
+
+            // Add it
+            Commands.push(Parent)
+        }
+
+        // Add if made top
+        if (MadeTop)
+            (<SlashCommandBuilder>TopmostParent.SlashCommand).addSubcommandGroup(<SlashCommandSubcommandGroupBuilder>Parent.SlashCommand)
+
+        // Return
+        return [TopmostParent, Parent]
+    } else {
+        return [TopmostParent]
+    }
 }
 
 //
 export interface IImportFormat {
-    SlashCommand: SlashCommandSubcommandBuilder
+    SlashCommand: SlashCommandSubcommandBuilder | SlashCommandBuilder
     Permissions?: Permissions | PermissionHandler | RolePermissionHandler
     Callback?: Function
     Ignored?: boolean
@@ -93,71 +89,66 @@ export interface IImportFormat {
 
 /**
  * Adds a command to the commands
- * @param Path The "command" path. Example: subdirectory/command. You cannot have a depth larger than 2.
+ * @param Path The "command" path. Example: command/subgroup/subcommand. You cannot have a depth larger than 3.
  * @param UseSubcommands Whether to use subcommand groups or not. If the group does not exist, it will be made.
  * @param ImportData This includes the main command data
  * @returns Success
  */
 export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: IImportFormat){
-    // Ensure is not ignored
-    if (ImportData.Ignored){
-        return false
-    }
-
-    //
-    let command = new Command({
-        SlashCommand: ImportData.SlashCommand,
-        Type: "Command",
-        Permissions: ImportData.Permissions,
-        Callback: ImportData.Callback,
-        Children: []
-    })
-
-    //
-    if (!UseSubcommands) {
-        command.Type = "SlashCommand"
-        Commands.push(command)
-        return true
-    }
-
     // Vars
-    const SubcommandGroups = Path.split("/")
+    const Hierarchy = Path.split("/")
+    let [TopmostParent, Parent]: Command[] = []
 
-    //
-    if (SubcommandGroups.length > 2){
-        let error = new Error("Command depth too large (> 2)")
-        throw(error)
+    // See if there are parents, make them if they don't exist
+    if (Hierarchy.length >= 2 && UseSubcommands) {
+        // Attempt to get the subcommand parent
+        const ParentHierarchy = Hierarchy.slice()
+        ParentHierarchy.pop()
+        const Subcategories = FindSubcategory(ParentHierarchy, true)
+
+        // Return if undefined
+        if (!Subcategories)
+            return
+
+        // Set
+        TopmostParent = Subcategories[0]
+        Parent = Subcategories[1]
     }
 
-    //
-    if (SubcommandGroups.length == 1) {
-        command.Type = "SlashCommand"
-        Commands.push(command)
-        return true
-    }
-    SubcommandGroups.pop() // Disregard the actual file
+    let DesignatedParent: SlashCommandSubcommandGroupBuilder | SlashCommandBuilder | undefined
+    if (Hierarchy.length == 2) {
+        // Ensure topmost parent exists
+        if (!TopmostParent)
+            return
 
-    //
-    let CurrentSubcommandGroup = FindSubcategoryCreate(SubcommandGroups)
-    if (!CurrentSubcommandGroup){
-        return false
+        // Set
+        DesignatedParent = <SlashCommandBuilder>TopmostParent.SlashCommand
+    } else if (Hierarchy.length == 3) {
+        // Ensure parent exists
+        if (!Parent)
+            return
+
+        // Set
+        DesignatedParent = <SlashCommandSubcommandGroupBuilder>Parent.SlashCommand
     }
 
-    //
-    const SlashCommand = <SlashCommandBuilder | SlashCommandSubcommandGroupBuilder>CurrentSubcommandGroup.SlashCommand
-    SlashCommand.addSubcommand(ImportData.SlashCommand) // does not work atm
-    const commandcommand = new Command({
+    // Get the slash command
+    let SlashCommand = ImportData.SlashCommand
+
+    // Add
+    if (DesignatedParent)
+        DesignatedParent.addSubcommand(<SlashCommandSubcommandBuilder>SlashCommand) // errors for me for some reason - except when using the test ver...
+
+    // Create the command
+    const command = new Command({
         SlashCommand: SlashCommand,
-        Type: "Command",
         Permissions: ImportData.Permissions,
         Callback: ImportData.Callback,
-        Children: [],
-        Parent: CurrentSubcommandGroup
+        Parent: UseSubcommands ? DesignatedParent : undefined
     })
-    Commands.push(commandcommand)
 
-    //
-    return true
+    // Add it
+    Commands.push(command)
 }
 
 /**
@@ -197,16 +188,20 @@ export async function InitialiseCommands(Directory: string = "./src/commands", D
 }
 
 /**
- * Get a `Command` object based upon the command name and group name
- * @param CommandName The name of the command
- * @param SubcommandGroupName The name of the subcommand group name
+ * Get a `Command` object based upon the "comamand path"
+ * @param Path The path to the command. For example: command/subgroup/subcommand
  * @returns Command
  */
-export function GetCommand(CommandName: string, SubcommandGroupName?: string | null) {
-    if (SubcommandGroupName)
-        return Commands.find((command) => command.SlashCommand.name == CommandName && (command.Type == "Command" || command.Type == "SlashCommand") && command.Parent?.SlashCommand.name === SubcommandGroupName)
-    else
-        return Commands.find((command) => command.SlashCommand.name == CommandName && (command.Type == "Command" || command.Type == "SlashCommand"))
+export function GetCommand(Path: (string | null)[]) {
+    // Filter null stuff out
+    const GoodPath = Path.filter(item => item)
+
+    if (GoodPath.length == 1)
+        return Commands.find(command => command.SlashCommand.name === GoodPath[0] && command.SlashCommand instanceof SlashCommandBuilder)
+    
+    const CommandName = GoodPath.pop()
+    const Parent = GoodPath[GoodPath.length - 1]
+    return Commands.find(command => command.SlashCommand.name == CommandName && command.SlashCommand instanceof SlashCommandSubcommandBuilder && command.Parent?.name == Parent)
 }
 
 /**
@@ -219,8 +214,8 @@ export function GetSlashCommands(){
 
     // Push every SlashCommand to array
     for (const command of Commands){
-        if (command.SlashCommand instanceof SlashCommandBuilder || command.Type == "SlashCommand")
-            SlashCommands.push(<SlashCommandBuilder>command.SlashCommand)
+        if (command.SlashCommand instanceof SlashCommandBuilder)
+            SlashCommands.push(command.SlashCommand)
     }
 
     // Return

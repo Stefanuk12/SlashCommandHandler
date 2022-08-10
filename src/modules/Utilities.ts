@@ -39,31 +39,3 @@ export function CreateBaseEmbed(Condition: EmbedCondition, User?: User){
     // Return
     return Embed
 }
-
-// Convert
-export function ConvertSubToSlash(Command: SlashCommandSubcommandBuilder){
-    const SlashCommand = new SlashCommandBuilder()
-        .setName(Command.name)
-        .setDescription(Command.description);
-
-    for (const option of Command.options){
-        if (option.type == 3)
-            SlashCommand.addStringOption(<SlashCommandStringOption>option)
-        if (option.type == 4)
-            SlashCommand.addIntegerOption(<SlashCommandIntegerOption>option)
-        if (option.type == 5)
-            SlashCommand.addBooleanOption(<SlashCommandBooleanOption>option)
-        if (option.type == 6)
-            SlashCommand.addUserOption(<SlashCommandUserOption>option)
-        if (option.type == 7)
-            SlashCommand.addChannelOption(<SlashCommandChannelOption>option)
-        if (option.type == 8)
-            SlashCommand.addRoleOption(<SlashCommandRoleOption>option)
-        if (option.type == 9)
-            SlashCommand.addMentionableOption(<SlashCommandMentionableOption>option)
-        if (option.type == 10)
-            SlashCommand.addNumberOption(<SlashCommandNumberOption>option)
-    }
-
-    return SlashCommand
-}
