@@ -95,12 +95,25 @@ export interface IImportFormat {
  * @returns Success
  */
 export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: IImportFormat){
+    // Not using sub commands
+    if (!UseSubcommands) {
+        // Create the command
+        const command = new Command({
+            SlashCommand: <SlashCommandBuilder>ImportData.SlashCommand,
+            Permissions: ImportData.Permissions,
+            Callback: ImportData.Callback
+        })
+
+        // Add it
+        Commands.push(command)
+    }
+
     // Vars
     const Hierarchy = Path.split("/")
     let [TopmostParent, Parent]: Command[] = []
 
     // See if there are parents, make them if they don't exist
-    if (Hierarchy.length >= 2 && UseSubcommands) {
+    if (Hierarchy.length >= 2) {
         // Attempt to get the subcommand parent
         const ParentHierarchy = Hierarchy.slice()
         ParentHierarchy.pop()
