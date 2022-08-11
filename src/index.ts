@@ -1,5 +1,5 @@
 // Dependencies
-import { ChatInputCommandInteraction, ContextMenuCommandInteraction, Interaction } from "discord.js";
+import { ChatInputCommandInteraction, ContextMenuCommandInteraction } from "discord.js";
 import { Command, ICommand } from "./modules/Command.js";
 import { AddCommand, Commands, GetCommand, GetContextCommand, GetContextCommands, GetSlashCommands, IImportFormat, InitialiseCommands } from "./modules/Commands.js";
 import { IPermissionHandler, PermissionHandler } from "./modules/PermissionHandler.js";
@@ -32,10 +32,7 @@ async function _CommandInteractionListener(interaction: ChatInputCommandInteract
 }
 
 // Listener that has failsafes
-async function CommandInteractionListener(interaction: Interaction){
-    // Make sure it is a command
-    if (!interaction.isChatInputCommand()) return
-
+async function CommandInteractionListener(interaction: ChatInputCommandInteraction){
     // Defer the reply so we have time
     if (!interaction.deferred)
         await interaction.deferReply({
@@ -84,6 +81,12 @@ async function _ContextInteractionListener(interaction: ContextMenuCommandIntera
 
 // Listener for context commands
 export async function ContextInteractionListener(interaction: ContextMenuCommandInteraction) {
+    // Defer the reply so we have time
+    if (!interaction.deferred)
+        await interaction.deferReply({
+            ephemeral: true
+        })
+
     // Attempt to handle
     try {
         await _ContextInteractionListener(interaction)
