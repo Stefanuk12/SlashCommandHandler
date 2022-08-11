@@ -1,12 +1,12 @@
 // Dependencies
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
+import { ContextMenuCommandBuilder, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
 import { PermissionHandler } from "./PermissionHandler.js";
 import { Permissions } from "./Permissions.js";
 import { RolePermissionHandler } from "./RolePermissionHandler.js";
 
 //
 export interface ICommand {
-    SlashCommand: SlashCommandBuilder | SlashCommandSubcommandGroupBuilder | SlashCommandSubcommandBuilder
+    SlashCommand: SlashCommandBuilder | ContextMenuCommandBuilder | SlashCommandSubcommandGroupBuilder | SlashCommandSubcommandBuilder
     Permissions?: Permissions | PermissionHandler | RolePermissionHandler
     Callback?: Function
 

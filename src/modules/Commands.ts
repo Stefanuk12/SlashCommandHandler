@@ -1,5 +1,5 @@
 // Dependencies
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
+import { ContextMenuCommandBuilder, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
 import { lstatSync, readdirSync } from "fs";
 import { Command } from "./Command.js";
 import { PermissionHandler } from "./PermissionHandler.js";
@@ -81,7 +81,7 @@ export function FindSubcategory(Path: string[], Create: boolean = false){
 
 //
 export interface IImportFormat {
-    SlashCommand: SlashCommandSubcommandBuilder | SlashCommandBuilder
+    SlashCommand: SlashCommandSubcommandBuilder | SlashCommandBuilder | ContextMenuCommandBuilder
     Permissions?: Permissions | PermissionHandler | RolePermissionHandler
     Callback?: Function
     Ignored?: boolean
@@ -95,6 +95,19 @@ export interface IImportFormat {
  * @returns Success
  */
 export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: IImportFormat){
+    // Context Command
+    if (ImportData.SlashCommand instanceof ContextMenuCommandBuilder) {
+        // Create the command
+        const command = new Command({
+            SlashCommand: ImportData.SlashCommand,
+            Permissions: ImportData.Permissions,
+            Callback: ImportData.Callback
+        })
+
+        // Add it
+        return Commands.push(command)
+    }
+
     // Not using sub commands
     if (!UseSubcommands) {
         // Create the command
@@ -105,7 +118,7 @@ export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: II
         })
 
         // Add it
-        Commands.push(command)
+        return Commands.push(command)
     }
 
     // Vars
@@ -182,7 +195,7 @@ export async function InitialiseCommands(Directory: string = "./src/commands", D
         }
         
         // Check file type
-        if (path.extname(Dir) != ".js"){
+        if (path.extname(Dir) != ".ts"){
             continue
         }
 
@@ -210,11 +223,28 @@ export function GetCommand(Path: (string | null)[]) {
     const GoodPath = Path.filter(item => item)
 
     if (GoodPath.length == 1)
-        return Commands.find(command => command.SlashCommand.name === GoodPath[0] && command.SlashCommand instanceof SlashCommandBuilder)
+        return Commands.find(command => command.SlashCommand instanceof SlashCommandBuilder && command.SlashCommand.name === GoodPath[0])
     
     const CommandName = GoodPath.pop()
     const Parent = GoodPath[GoodPath.length - 1]
-    return Commands.find(command => command.SlashCommand.name == CommandName && command.SlashCommand instanceof SlashCommandSubcommandBuilder && command.Parent?.name == Parent)
+    return Commands.find(command => command.SlashCommand instanceof SlashCommandSubcommandBuilder && command.SlashCommand.name == CommandName && command.Parent?.name == Parent)
+}
+
+/**
+ * Get a `Command` object based upon the "comamand path"
+ * @param Path The path to the command. For example: command/subgroup/subcommand
+ * @returns Command
+ */
+ export function GetContextCommand(Path: (string | null)[]) {
+    // Filter null stuff out
+    const GoodPath = Path.filter(item => item)
+
+    if (GoodPath.length == 1)
+        return Commands.find(command => command.SlashCommand instanceof ContextMenuCommandBuilder && command.SlashCommand.name === GoodPath[0])
+    
+    const CommandName = GoodPath.pop()
+    const Parent = GoodPath[GoodPath.length - 1]
+    return Commands.find(command => command.SlashCommand instanceof ContextMenuCommandBuilder && command.SlashCommand.name == CommandName && command.Parent?.name == Parent)
 }
 
 /**
@@ -233,4 +263,22 @@ export function GetSlashCommands(){
 
     // Return
     return SlashCommands
+}
+
+/**
+ * Get the main `ContextCommand` for each command.
+ * @returns An array of `ContextMenuCommandBuilder` objects
+ */
+ export function GetContextCommands(){
+    // Vars
+    let ContextCommands: ContextMenuCommandBuilder[] = []
+
+    // Push every SlashCommand to array
+    for (const command of Commands){
+        if (command.SlashCommand instanceof ContextMenuCommandBuilder)
+            ContextCommands.push(command.SlashCommand)
+    }
+
+    // Return
+    return ContextCommands
 }

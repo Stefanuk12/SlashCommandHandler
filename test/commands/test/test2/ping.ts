@@ -7,6 +7,6 @@ export const SlashCommand = new SlashCommandSubcommandBuilder()
     .setDescription("Test command");
 
 //
-export async function Callback(interaction) {
+export async function Callback() {
     console.log("Pong!")
 }
