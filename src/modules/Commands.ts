@@ -195,7 +195,7 @@ export async function InitialiseCommands(Directory: string = "./src/commands", D
         }
         
         // Check file type
-        if (path.extname(Dir) != ".ts"){
+        if (path.extname(Dir) != ".js"){
             continue
         }
 
