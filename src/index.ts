@@ -23,7 +23,7 @@ async function HandleInteraction(interaction: CommandInteraction, Command: Comma
 }
 
 // Listener that has failsafes
-async function CommandInteractionListener(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, MessageOnError = true){
+async function CommandInteractionListener(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, MessageOnError = true, IgnoredErrors = ["Invalid command", "No subcommand specified for interaction."]){
     try {
         // Make sure the command exists first
         let SubcommandGroup = null
@@ -48,7 +48,7 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
         return true
     } catch (error: any) {
         // Ignore the invalid command
-        if (error.message == "Invalid command" || !MessageOnError)
+        if (IgnoredErrors.includes(error.message) || !MessageOnError)
             return false
 
         // Create Embed
