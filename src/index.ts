@@ -56,7 +56,10 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
             .setDescription(error.message);
 
         // Send
-        await interaction.editReply({ embeds: [Embed] })
+        if (interaction.replied)
+            await interaction.editReply({ embeds: [Embed] })
+        else
+            await interaction.reply({ embeds: [Embed] })
 
         // Return
         return false
