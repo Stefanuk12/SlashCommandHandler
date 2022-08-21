@@ -23,7 +23,7 @@ async function HandleInteraction(interaction: CommandInteraction, Command: Comma
 }
 
 // Listener that has failsafes
-async function CommandInteractionListener(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction){
+async function CommandInteractionListener(interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction, MessageOnError = true){
     try {
         // Make sure the command exists first
         let SubcommandGroup = null
@@ -40,13 +40,17 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
 
         // Defer the reply so we have time
         if (!interaction.deferred)
-        await interaction.deferReply({
-            ephemeral: true
-        })
+            await interaction.deferReply({
+                ephemeral: true
+            })
 
         await HandleInteraction(interaction, Command)
         return true
     } catch (error: any) {
+        // Ignore the invalid command
+        if (error.message == "Invalid command" || !MessageOnError)
+            return false
+
         // Create Embed
         const Embed = CreateBaseEmbed("Error", interaction.user)
             .setDescription(error.message);
