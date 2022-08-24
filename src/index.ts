@@ -1,7 +1,7 @@
 // Dependencies
 import { ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandInteraction } from "discord.js";
 import { Command, ICommand } from "./modules/Command.js";
-import { AddCommand, Commands, GetCommand, GetContextCommand, GetContextCommands, GetSlashCommands, IImportFormat, InitialiseCommands } from "./modules/Commands.js";
+import { AddCommand, Commands, GetCommand, GetContextCommands, GetSlashCommands, IImportFormat, InitialiseCommands } from "./modules/Commands.js";
 import { IPermissionHandler, PermissionHandler } from "./modules/PermissionHandler.js";
 import { CreateBaseEmbed, UserToGuildMember } from "./modules/Utilities.js";
 import { IPermissions, Permissions } from "./modules/Permissions.js";
@@ -72,7 +72,7 @@ export const ContextInteractionListener = CommandInteractionListener
 
 // Exports
 export { Command, ICommand }
-export { Commands, InitialiseCommands, GetCommand, GetContextCommands, IImportFormat, GetSlashCommands, AddCommand, GetContextCommand }
+export { Commands, InitialiseCommands, GetCommand, GetContextCommands, IImportFormat, GetSlashCommands, AddCommand }
 export { PermissionHandler, IPermissionHandler }
 export { Permissions, IPermissions }
 export { RolePermissionHandler, IRolePermissionHandler }

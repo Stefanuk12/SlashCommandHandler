@@ -215,7 +215,7 @@ export async function InitialiseCommands(Directory: string = "./src/commands", D
 
 /**
  * Get a `Command` object based upon the "comamand path"
- * @param Path The path to the command. For example: command/subgroup/subcommand
+ * @param Path The path to the command. For example: ["command", "subgroup", "subcommand"]
  * @returns Command
  */
 export function GetCommand(Path: (string | null)[]) {
@@ -223,28 +223,11 @@ export function GetCommand(Path: (string | null)[]) {
     const GoodPath = Path.filter(item => item)
 
     if (GoodPath.length == 1)
-        return Commands.find(command => command.SlashCommand instanceof SlashCommandBuilder && command.SlashCommand.name === GoodPath[0])
+        return Commands.find(command => (command.SlashCommand instanceof SlashCommandBuilder || command.SlashCommand instanceof ContextMenuCommandBuilder) && command.SlashCommand.name === GoodPath[0])
     
     const CommandName = GoodPath.pop()
     const Parent = GoodPath[GoodPath.length - 1]
-    return Commands.find(command => command.SlashCommand instanceof SlashCommandSubcommandBuilder && command.SlashCommand.name == CommandName && command.Parent?.name == Parent)
-}
-
-/**
- * Get a `Command` object based upon the "comamand path"
- * @param Path The path to the command. For example: command/subgroup/subcommand
- * @returns Command
- */
- export function GetContextCommand(Path: (string | null)[]) {
-    // Filter null stuff out
-    const GoodPath = Path.filter(item => item)
-
-    if (GoodPath.length == 1)
-        return Commands.find(command => command.SlashCommand instanceof ContextMenuCommandBuilder && command.SlashCommand.name === GoodPath[0])
-    
-    const CommandName = GoodPath.pop()
-    const Parent = GoodPath[GoodPath.length - 1]
-    return Commands.find(command => command.SlashCommand instanceof ContextMenuCommandBuilder && command.SlashCommand.name == CommandName && command.Parent?.name == Parent)
+    return Commands.find(command => (command.SlashCommand instanceof SlashCommandSubcommandBuilder) && command.SlashCommand.name == CommandName && command.Parent?.name == Parent)
 }
 
 /**
