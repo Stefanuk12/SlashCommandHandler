@@ -11,6 +11,7 @@ export interface ICommand {
     Callback?: Function
 
     Parent?: SlashCommandBuilder | SlashCommandSubcommandGroupBuilder
+    NoDefer?: boolean
 }
 export interface Command extends ICommand {}
 export class Command {

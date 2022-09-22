@@ -39,7 +39,7 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
         }
 
         // Defer the reply so we have time
-        if (!interaction.deferred)
+        if (!interaction.deferred && !Command.NoDefer)
             await interaction.deferReply({
                 ephemeral: true
             })

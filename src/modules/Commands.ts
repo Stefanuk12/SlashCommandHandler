@@ -85,6 +85,7 @@ export interface IImportFormat {
     Permissions?: Permissions | PermissionHandler | RolePermissionHandler
     Callback?: Function
     Ignored?: boolean
+    NoDefer?: boolean
 }
 
 /**
@@ -101,7 +102,8 @@ export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: II
         const command = new Command({
             SlashCommand: ImportData.SlashCommand,
             Permissions: ImportData.Permissions,
-            Callback: ImportData.Callback
+            Callback: ImportData.Callback,
+            NoDefer: ImportData.NoDefer
         })
 
         // Add it
@@ -170,7 +172,8 @@ export function AddCommand(Path: string, UseSubcommands: boolean, ImportData: II
         SlashCommand: SlashCommand,
         Permissions: ImportData.Permissions,
         Callback: ImportData.Callback,
-        Parent: UseSubcommands ? DesignatedParent : undefined
+        Parent: UseSubcommands ? DesignatedParent : undefined,
+        NoDefer: ImportData.NoDefer
     })
 
     // Add it
