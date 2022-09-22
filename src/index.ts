@@ -59,12 +59,12 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
         try {
             // Try to edit reply
             await interaction.editReply({ embeds: [Embed] })
-        } catch (e) {
+        } catch (e: any) {
             // Try to reply instead
             try {
                 await interaction.reply({ embeds: [Embed] })
-            } catch (e) {
-                console.warn(`Unable to reply to command error. Likely conflict. Conflict command: ${interaction.commandName}`)
+            } catch (e2: any) {
+                console.warn(`Unable to reply to command error. Likely conflict. Conflict command: ${interaction.commandName}. Error A: ${e.message}, Error B: ${e2.message}`)
             }
         }
 
