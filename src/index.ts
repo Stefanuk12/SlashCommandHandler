@@ -57,11 +57,12 @@ async function CommandInteractionListener(interaction: ChatInputCommandInteracti
 
         // Try to edit reply
         const Body = {embeds: [Embed]}
+        const BodyE = {embeds: [Embed], ephemeral: true}
         await interaction.editReply(Body).catch(async (e) => {
             // Try to edit instead
-            await interaction.reply(Body).catch(async (e2) => {
+            await interaction.reply(BodyE).catch(async (e2) => {
                 // Follow up as a last resort
-                await interaction.followUp(Body).catch((e3) => {
+                await interaction.followUp(BodyE).catch((e3) => {
                     // Give up
                     console.warn(`Unable to reply to command error. Likely conflict. Conflict command: ${interaction.commandName}. Error A: ${e.message}, Error B: ${e2.message}, Error C: ${e3.message}`)
                 })
